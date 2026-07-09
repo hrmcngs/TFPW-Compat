@@ -2,7 +2,10 @@ package com.hrmcngs.tfpw_compat;
 
 import com.hrmcngs.tfpw_compat.compat.IceAndFireCompat;
 import com.hrmcngs.tfpw_compat.compat.MekanismCompat;
+import com.hrmcngs.tfpw_compat.compat.TfpwHostCompat;
+import com.hrmcngs.tfpw_compat.event.DragonElementDefenseHandler;
 
+import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -34,10 +37,15 @@ public final class TfpwCompat {
         // 連携先のロード状況をここで確認しておく (詳細な初期化は各 Compat 側で遅延実行)。
         IceAndFireCompat.init();
         MekanismCompat.init();
+        TfpwHostCompat.init();
+
+        // ドラゴン属性攻撃 → 本体魔導書での無効化 (issue #199-A4) を FORGE バスへ登録。
+        // 相手 MOD 未ロード時はハンドラ内で no-op になるので常時登録してよい。
+        MinecraftForge.EVENT_BUS.register(DragonElementDefenseHandler.class);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        LOGGER.info("[TFPW-Compat] setup: iceandfire={}, mekanism={}",
-                IceAndFireCompat.isLoaded(), MekanismCompat.isLoaded());
+        LOGGER.info("[TFPW-Compat] setup: host={}, iceandfire={}, mekanism={}",
+                TfpwHostCompat.isLoaded(), IceAndFireCompat.isLoaded(), MekanismCompat.isLoaded());
     }
 }

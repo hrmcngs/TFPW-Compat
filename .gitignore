@@ -1,0 +1,23 @@
+# Gradle / build
+.gradle/
+build/
+out/
+bin/
+
+# Forge dev run
+run/
+
+# 開発時のみ置く外部 mod jar (連携相手の deobf jar)
+libs/local/
+
+# IDE
+.idea/
+*.iml
+.eclipse/
+.settings/
+.classpath
+.project
+.vscode/
+
+# OS
+.DS_Store

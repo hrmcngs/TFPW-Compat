@@ -1,0 +1,110 @@
+buildscript {
+    repositories {
+        maven { url = 'https://maven.minecraftforge.net' }
+        mavenCentral()
+    }
+    dependencies {
+        classpath group: 'net.minecraftforge.gradle', name: 'ForgeGradle', version: '5.1.+', changing: true
+    }
+}
+apply plugin: 'net.minecraftforge.gradle'
+apply plugin: 'eclipse'
+
+// =====================================================================
+// TFPW-Compat — the_four_primitives_and_weapons 用の連携専用アドオン MOD。
+//   Ice and Fire / Mekanism との連携を **完全リフレクション** で実装するため、
+//   相手 MOD への compile 依存は張らない ( 相手が無くてもロード失敗しない )。
+//   開発中に実際に動作確認したいときだけ libs/local/ に deobf jar を放り込む。
+// =====================================================================
+
+version = project.findProperty('mod_version') ?: '0.1.0'
+group = 'com.hrmcngs.tfpw_compat'
+archivesBaseName = 'TFPW-Compat-forge-1.20.1'
+
+java.toolchain.languageVersion = JavaLanguageVersion.of(17)
+
+def mc_version      = project.findProperty('MC_VERSION') ?: '1.20.1'
+def mapping_version = project.findProperty('MAPPING_VERSION') ?: '1.20.1'
+def forge_version   = project.findProperty('FORGE_VERSION') ?: '1.20.1-47.4.0'
+
+println("Building TFPW-Compat for Minecraft ${mc_version} with Forge ${forge_version}")
+
+minecraft {
+    mappings channel: 'official', version: mapping_version
+
+    runs {
+        client {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                tfpw_compat {
+                    source sourceSets.main
+                }
+            }
+        }
+        server {
+            workingDirectory project.file('run')
+            property 'forge.logging.markers', 'REGISTRIES'
+            property 'forge.logging.console.level', 'debug'
+            mods {
+                tfpw_compat {
+                    source sourceSets.main
+                }
+            }
+        }
+    }
+}
+
+repositories {
+    // 開発時に相手 MOD ( iceandfire / mekanism / the_four_primitives_and_weapons 本体 )
+    // の deobf jar を放り込んで実動作確認するためのローカル Maven。
+    //   libs/local/<artifact>-<version>.jar を置くと runtimeOnly で取り込む。
+    maven {
+        url = file('libs').toURI()
+        metadataSources { artifact() }
+    }
+}
+
+dependencies {
+    minecraft "net.minecraftforge:forge:${forge_version}"
+
+    // ─── 開発時のみ: libs/local/ 配下の deobf jar を runClient に同梱 ───────
+    //   連携コード本体はリフレクションなので compile 依存は不要。
+    //   実際にドラゴンや Mekanism 機械を起動して確認したいときだけ jar を置く。
+    def localDir = file('libs/local')
+    if (localDir.exists()) {
+        localDir.listFiles()?.findAll { it.isFile() && it.name.endsWith('.jar') }?.each { f ->
+            def base = f.name.replaceFirst(/\.jar$/, '')
+            def tokens = base.split('-')
+            def i = tokens.findIndexOf { it ==~ /^\d.*/ }
+            if (i > 0) {
+                def artifact = tokens[0..<i].join('-')
+                def ver = tokens[i..-1].join('-')
+                def mvnDir = new File(localDir, "${artifact}/${ver}")
+                def mvnJar = new File(mvnDir, "${artifact}-${ver}.jar")
+                if (!mvnJar.exists()) { mvnDir.mkdirs(); java.nio.file.Files.copy(f.toPath(), mvnJar.toPath()) }
+                println "[external] local:${artifact}:${ver} を runtimeOnly(fg.deobf) で取り込み"
+                runtimeOnly fg.deobf("local:${artifact}:${ver}")
+            } else {
+                println "[external] ${f.name} の artifact/version を解析できません ( skip )"
+            }
+        }
+    }
+}
+
+jar {
+    archiveFileName = "TFPW-Compat-forge-1.20.1-${version}.jar"
+}
+
+processResources {
+    inputs.property 'mc_version', mc_version
+    inputs.property 'mod_version', version
+    filesMatching('META-INF/mods.toml') {
+        expand 'mc_version': mc_version, 'version': version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = 'UTF-8'
+}

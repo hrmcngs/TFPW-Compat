@@ -4,8 +4,13 @@ import com.hrmcngs.tfpw_compat.compat.IceAndFireCompat;
 import com.hrmcngs.tfpw_compat.compat.MekanismCompat;
 import com.hrmcngs.tfpw_compat.compat.TfpwHostCompat;
 import com.hrmcngs.tfpw_compat.event.DragonElementDefenseHandler;
+import com.hrmcngs.tfpw_compat.entity.ElementDragonEntity;
+import com.hrmcngs.tfpw_compat.entity.ModEntities;
+import com.hrmcngs.tfpw_compat.item.ModItems;
+import com.hrmcngs.tfpw_compat.item.ModTabs;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.event.entity.EntityAttributeCreationEvent;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -34,6 +39,13 @@ public final class TfpwCompat {
         IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
         modBus.addListener(this::commonSetup);
 
+        // 自前アイテム (ドラゴン素材武器 A-1 / スポーンエッグ) とクリエイティブタブ、
+        // 属性ドラゴン entity (A-3) を登録。
+        ModItems.REGISTRY.register(modBus);
+        ModTabs.REGISTRY.register(modBus);
+        ModEntities.REGISTRY.register(modBus);
+        modBus.addListener(this::onEntityAttributes);
+
         // 連携先のロード状況をここで確認しておく (詳細な初期化は各 Compat 側で遅延実行)。
         IceAndFireCompat.init();
         MekanismCompat.init();
@@ -47,5 +59,18 @@ public final class TfpwCompat {
     private void commonSetup(final FMLCommonSetupEvent event) {
         LOGGER.info("[TFPW-Compat] setup: host={}, iceandfire={}, mekanism={}",
                 TfpwHostCompat.isLoaded(), IceAndFireCompat.isLoaded(), MekanismCompat.isLoaded());
+    }
+
+    /** 属性ドラゴン (11 種) の属性 (Attributes) を登録する。 */
+    private void onEntityAttributes(final EntityAttributeCreationEvent event) {
+        event.put(ModEntities.CORROSION_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.MIASMA_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.SOUL_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.SOUL_FIRE_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.WIND_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.WATER_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.DARK_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.HOLY_DRAGON.get(), ElementDragonEntity.createAttributes().build());
+        event.put(ModEntities.ERASURE_DRAGON.get(), ElementDragonEntity.createAttributes().build());
     }
 }

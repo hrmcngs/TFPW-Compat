@@ -69,9 +69,13 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${forge_version}"
 
-    // ─── 開発時のみ: libs/local/ 配下の deobf jar を runClient に同梱 ───────
-    //   連携コード本体はリフレクションなので compile 依存は不要。
-    //   実際にドラゴンや Mekanism 機械を起動して確認したいときだけ jar を置く。
+    // ─── libs/local/ 配下の deobf jar を取り込む ──────────────────────────
+    //   連携コード本体はリフレクションなので compile 依存不要 → runtimeOnly。
+    //   ただし属性ドラゴン (issue #199-A3) は Ice and Fire の EntityDragonBase を
+    //   継承するため compile 依存が要る。 artifact 名が "iceandfire" の jar だけは
+    //   implementation ( compile + runtime ) で取り込む。
+    //   → Ice and Fire CE の deobf/dev jar を libs/local/ に置くこと
+    //     (例: libs/local/iceandfire-1.20.1-x.y.z.jar)。無い場合ドラゴンはコンパイル不可。
     def localDir = file('libs/local')
     if (localDir.exists()) {
         localDir.listFiles()?.findAll { it.isFile() && it.name.endsWith('.jar') }?.each { f ->
@@ -84,8 +88,13 @@ dependencies {
                 def mvnDir = new File(localDir, "${artifact}/${ver}")
                 def mvnJar = new File(mvnDir, "${artifact}-${ver}.jar")
                 if (!mvnJar.exists()) { mvnDir.mkdirs(); java.nio.file.Files.copy(f.toPath(), mvnJar.toPath()) }
-                println "[external] local:${artifact}:${ver} を runtimeOnly(fg.deobf) で取り込み"
-                runtimeOnly fg.deobf("local:${artifact}:${ver}")
+                if (artifact.toLowerCase().contains('iceandfire')) {
+                    println "[external] local:${artifact}:${ver} を implementation(fg.deobf) で取り込み (ドラゴン compile 依存)"
+                    implementation fg.deobf("local:${artifact}:${ver}")
+                } else {
+                    println "[external] local:${artifact}:${ver} を runtimeOnly(fg.deobf) で取り込み"
+                    runtimeOnly fg.deobf("local:${artifact}:${ver}")
+                }
             } else {
                 println "[external] ${f.name} の artifact/version を解析できません ( skip )"
             }

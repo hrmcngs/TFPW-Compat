@@ -1,0 +1,19 @@
+{
+  "type": "minecraft:crafting_shaped",
+  "pattern": [
+    "1",
+    "1",
+    "2"
+  ],
+  "key": {
+    "1": {
+      "item": "iceandfire:dragonsteel_lightning_ingot"
+    },
+    "2": {
+      "item": "minecraft:stick"
+    }
+  },
+  "result": {
+    "item": "tfpw_compat:lightning_dragonsteel_katana"
+  }
+}

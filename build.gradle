@@ -69,35 +69,79 @@ repositories {
 dependencies {
     minecraft "net.minecraftforge:forge:${forge_version}"
 
-    // ─── libs/local/ 配下の deobf jar を取り込む ──────────────────────────
-    //   連携コード本体はリフレクションなので compile 依存不要 → runtimeOnly。
-    //   ただし属性ドラゴン (issue #199-A3) は Ice and Fire の EntityDragonBase を
-    //   継承するため compile 依存が要る。 artifact 名が "iceandfire" の jar だけは
-    //   implementation ( compile + runtime ) で取り込む。
-    //   → Ice and Fire CE の deobf/dev jar を libs/local/ に置くこと
-    //     (例: libs/local/iceandfire-1.20.1-x.y.z.jar)。無い場合ドラゴンはコンパイル不可。
+    // ─── 前提 MOD ( libs/local/ 配下の .jar ) を取り込む ───────────────────
+    //   本 MOD のコードは 完全リフレクション + Forge ネイティブ実装なので
+    //   compile 依存は一切不要 → すべて runtimeOnly ( 本体 the_four_primitives_and_weapons と同方式 )。
+    //   置き方はどちらでも可 ( 再帰で拾う ):
+    //     - フラット:     libs/local/foo-1.2.3.jar
+    //     - Maven 階層:   libs/local/foo/1.2.3/foo-1.2.3.jar
+    //   フラット jar は Maven 階層へ自動転写され、 fg.deobf("local:foo:1.2.3") で
+    //   ForgeGradle が SRG → official のリマップを掛ける ( dev でもクラッシュしない )。
+    //   どの MOD を入れるべきかは libs/README.md を参照。
     def localDir = file('libs/local')
-    if (localDir.exists()) {
-        localDir.listFiles()?.findAll { it.isFile() && it.name.endsWith('.jar') }?.each { f ->
-            def base = f.name.replaceFirst(/\.jar$/, '')
-            def tokens = base.split('-')
+    if (!localDir.exists()) {
+        println "[external] libs/local/ が無い ( 前提 MOD の jar を置くと自動ロード。 libs/README.md 参照 )"
+    } else {
+        // ファイル名 "<artifact>-<version>" の推定 ( 最初に数字で始まる token 以降を version )。
+        def parseJar = { String baseName ->
+            def tokens = baseName.split('-')
             def i = tokens.findIndexOf { it ==~ /^\d.*/ }
-            if (i > 0) {
-                def artifact = tokens[0..<i].join('-')
-                def ver = tokens[i..-1].join('-')
-                def mvnDir = new File(localDir, "${artifact}/${ver}")
-                def mvnJar = new File(mvnDir, "${artifact}-${ver}.jar")
-                if (!mvnJar.exists()) { mvnDir.mkdirs(); java.nio.file.Files.copy(f.toPath(), mvnJar.toPath()) }
-                if (artifact.toLowerCase().contains('iceandfire')) {
-                    println "[external] local:${artifact}:${ver} を implementation(fg.deobf) で取り込み (ドラゴン compile 依存)"
-                    implementation fg.deobf("local:${artifact}:${ver}")
-                } else {
-                    println "[external] local:${artifact}:${ver} を runtimeOnly(fg.deobf) で取り込み"
-                    runtimeOnly fg.deobf("local:${artifact}:${ver}")
-                }
-            } else {
-                println "[external] ${f.name} の artifact/version を解析できません ( skip )"
+            if (i <= 0) return null
+            return [artifact: tokens[0..<i].join('-'), version: tokens[i..-1].join('-')]
+        }
+        // Maven 座標に使えない文字を潰す ( どんなファイル名でも座標化できるように )。
+        def sanitize = { String s -> s.replaceAll(/[^A-Za-z0-9._+]/, '_') }
+
+        def seen = [] as Set
+        def take = { String artifact, String version ->
+            if (seen.add("${artifact}:${version}".toString())) {
+                println "[external] local:${artifact}:${version} を runtimeOnly(fg.deobf) で取り込み"
+                runtimeOnly fg.deobf("local:${artifact}:${version}")
             }
+        }
+
+        // libs/local 配下の .jar を再帰収集 ( サブフォルダに雑に置いても拾う )。
+        // 先にスナップショットを取ってから転写する ( ループ中に増える copy を再処理しないため )。
+        def jars = []
+        localDir.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+            if (f.name.endsWith('.jar')) jars << f
+        }
+
+        jars.each { f ->
+            def base = f.name.replaceFirst(/\.jar$/, '')
+            def verDir = f.parentFile
+            def artDir = verDir?.parentFile
+
+            // 既に Maven 階層 ( libs/local/<artifact>/<version>/<artifact>-<version>.jar ) にある場合はそのまま。
+            if (artDir != null && artDir.parentFile?.canonicalFile == localDir.canonicalFile
+                    && base == "${artDir.name}-${verDir.name}") {
+                take(artDir.name, verDir.name)
+                return
+            }
+
+            // それ以外は artifact/version を推定。 解析できなければ fallback で必ず取り込む。
+            def info = parseJar(base)
+            def artifact, version
+            if (info != null) {
+                artifact = info.artifact
+                version = info.version
+            } else {
+                artifact = sanitize(base)
+                version = '0.0.0'
+                println "[external] ${f.name}: version を推定できないため local:${artifact}:0.0.0 として取り込み"
+            }
+
+            // Maven 階層へ転写 ( fg.deobf が SRG → official リマップを掛けられるようにする )。
+            def mvnDir = new File(localDir, "${artifact}/${version}")
+            def mvnJar = new File(mvnDir, "${artifact}-${version}.jar")
+            if (!mvnJar.exists()) { mvnDir.mkdirs(); java.nio.file.Files.copy(f.toPath(), mvnJar.toPath()) }
+            take(artifact, version)
+        }
+
+        if (seen.isEmpty()) {
+            println "[external] libs/local/ に .jar が見つかりません ( 単体起動: 連携は no-op )"
+        } else {
+            println "[external] 合計 ${seen.size()} 個の前提 MOD jar をロード"
         }
     }
 }

@@ -4,8 +4,11 @@ import com.hrmcngs.tfpw_compat.compat.IceAndFireCompat;
 import com.hrmcngs.tfpw_compat.compat.MekanismCompat;
 import com.hrmcngs.tfpw_compat.compat.TfpwHostCompat;
 import com.hrmcngs.tfpw_compat.event.DragonElementDefenseHandler;
+import com.hrmcngs.tfpw_compat.block.ModBlockEntities;
+import com.hrmcngs.tfpw_compat.block.ModBlocks;
 import com.hrmcngs.tfpw_compat.entity.ElementDragonEntity;
 import com.hrmcngs.tfpw_compat.entity.ModEntities;
+import com.hrmcngs.tfpw_compat.event.ElementalGenerationHandler;
 import com.hrmcngs.tfpw_compat.item.ModItems;
 import com.hrmcngs.tfpw_compat.item.ModTabs;
 
@@ -41,6 +44,8 @@ public final class TfpwCompat {
 
         // 自前アイテム (ドラゴン素材武器 A-1 / スポーンエッグ) とクリエイティブタブ、
         // 属性ドラゴン entity (A-3) を登録。
+        ModBlocks.REGISTRY.register(modBus);
+        ModBlockEntities.REGISTRY.register(modBus);
         ModItems.REGISTRY.register(modBus);
         ModTabs.REGISTRY.register(modBus);
         ModEntities.REGISTRY.register(modBus);
@@ -54,6 +59,8 @@ public final class TfpwCompat {
         // ドラゴン属性攻撃 → 本体魔導書での無効化 (issue #199-A4) を FORGE バスへ登録。
         // 相手 MOD 未ロード時はハンドラ内で no-op になるので常時登録してよい。
         MinecraftForge.EVENT_BUS.register(DragonElementDefenseHandler.class);
+        // 電気/雷属性攻撃 → 近傍の属性発電機へ FE 注入 (issue #199-B)。
+        MinecraftForge.EVENT_BUS.register(ElementalGenerationHandler.class);
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
@@ -71,6 +78,5 @@ public final class TfpwCompat {
         event.put(ModEntities.WATER_DRAGON.get(), ElementDragonEntity.createAttributes().build());
         event.put(ModEntities.DARK_DRAGON.get(), ElementDragonEntity.createAttributes().build());
         event.put(ModEntities.HOLY_DRAGON.get(), ElementDragonEntity.createAttributes().build());
-        event.put(ModEntities.ERASURE_DRAGON.get(), ElementDragonEntity.createAttributes().build());
     }
 }

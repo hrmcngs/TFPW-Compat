@@ -25,6 +25,5 @@ public final class TfpwCompatClient {
         event.registerEntityRenderer(ModEntities.WATER_DRAGON.get(), ElementDragonRenderer::new);
         event.registerEntityRenderer(ModEntities.DARK_DRAGON.get(), ElementDragonRenderer::new);
         event.registerEntityRenderer(ModEntities.HOLY_DRAGON.get(), ElementDragonRenderer::new);
-        event.registerEntityRenderer(ModEntities.ERASURE_DRAGON.get(), ElementDragonRenderer::new);
     }
 }

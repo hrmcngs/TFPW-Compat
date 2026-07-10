@@ -26,6 +26,9 @@ public final class TfpwHostCompat {
     private static Method mIsNullifiedByBook;     // boolean isElementNullifiedByBook(LivingEntity, ElementType)
     private static Method mSetElement;            // void setElement(ItemStack, ElementType, int)
     private static Method mApplyElementalDamage;  // float applyElementalDamage(LivingEntity, LivingEntity, ItemStack, float)
+    private static Method mGetEffectiveElementType;  // ElementType getEffectiveElementType(ItemStack)
+    private static Method mGetEffectiveElementLevel; // int getEffectiveElementLevel(ItemStack)
+    private static Method mElementGetName;           // String ElementType.getName()
 
     private TfpwHostCompat() {}
 
@@ -54,6 +57,9 @@ public final class TfpwHostCompat {
                     "setElement", ItemStack.class, elementCls, int.class);
             mApplyElementalDamage = utilsCls.getMethod(
                     "applyElementalDamage", LivingEntity.class, LivingEntity.class, ItemStack.class, float.class);
+            mGetEffectiveElementType = utilsCls.getMethod("getEffectiveElementType", ItemStack.class);
+            mGetEffectiveElementLevel = utilsCls.getMethod("getEffectiveElementLevel", ItemStack.class);
+            mElementGetName = elementCls.getMethod("getName");
             return true;
         } catch (Throwable t) {
             // クラス/メソッドが見つからなければ無効化 (バージョン不整合でも落ちない)。
@@ -107,6 +113,35 @@ public final class TfpwHostCompat {
             return (result instanceof Number) ? ((Number) result).floatValue() : baseDmg;
         } catch (Throwable t) {
             return baseDmg;
+        }
+    }
+
+    /**
+     * 武器 (ItemStack) に付与された実効属性名を返す (本体 getEffectiveElementType → getName)。
+     * 属性なし / 未ロード / 失敗時は null。
+     */
+    public static String getWeaponElementName(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || !isLoaded()) return null;
+        try {
+            Object element = mGetEffectiveElementType.invoke(null, stack);
+            if (element == null) return null;
+            Object name = mElementGetName.invoke(element);
+            String s = (name == null) ? null : name.toString();
+            // "none" は属性なし扱い。
+            return (s == null || s.equalsIgnoreCase("none")) ? null : s;
+        } catch (Throwable t) {
+            return null;
+        }
+    }
+
+    /** 武器の実効属性レベル。属性なし / 未ロード / 失敗時は 0。 */
+    public static int getWeaponElementLevel(ItemStack stack) {
+        if (stack == null || stack.isEmpty() || !isLoaded()) return 0;
+        try {
+            Object lv = mGetEffectiveElementLevel.invoke(null, stack);
+            return (lv instanceof Number) ? ((Number) lv).intValue() : 0;
+        } catch (Throwable t) {
+            return 0;
         }
     }
 }

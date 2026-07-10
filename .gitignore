@@ -7,8 +7,12 @@ bin/
 # Forge dev run
 run/
 
-# 開発時のみ置く外部 mod jar (連携相手の deobf jar)
-libs/local/
+# 開発時のみ置く前提 MOD の jar (連携相手の deobf jar)。README/.gitkeep は残す
+libs/local/**
+libs/local-disabled/**
+!libs/local/.gitkeep
+!libs/local-disabled/.gitkeep
+!libs/README.md
 
 # IDE
 .idea/

@@ -50,8 +50,4 @@ public final class ModEntities {
             REGISTRY.register("holy_dragon", () ->
                     EntityType.Builder.<HolyDragonEntity>of(HolyDragonEntity::new, MobCategory.CREATURE)
                             .sized(1.4f, 1.6f).clientTrackingRange(10).updateInterval(3).build("holy_dragon"));
-    public static final RegistryObject<EntityType<ErasureDragonEntity>> ERASURE_DRAGON =
-            REGISTRY.register("erasure_dragon", () ->
-                    EntityType.Builder.<ErasureDragonEntity>of(ErasureDragonEntity::new, MobCategory.CREATURE)
-                            .sized(1.4f, 1.6f).clientTrackingRange(10).updateInterval(3).build("erasure_dragon"));
 }

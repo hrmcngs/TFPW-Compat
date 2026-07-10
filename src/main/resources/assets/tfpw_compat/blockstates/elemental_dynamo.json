@@ -1,0 +1,7 @@
+{
+  "variants": {
+    "": {
+      "model": "tfpw_compat:block/elemental_dynamo"
+    }
+  }
+}

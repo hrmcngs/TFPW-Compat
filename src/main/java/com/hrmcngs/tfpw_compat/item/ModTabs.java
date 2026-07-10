@@ -55,7 +55,9 @@ public final class ModTabs {
                         output.accept(ModItems.DRAGON_EGG_WATER.get());
                         output.accept(ModItems.DRAGON_EGG_DARK.get());
                         output.accept(ModItems.DRAGON_EGG_HOLY.get());
-                        output.accept(ModItems.DRAGON_EGG_ERASURE.get());
+
+                        // B: 属性発電機
+                        output.accept(ModItems.ELEMENTAL_DYNAMO.get());
                     })
                     .build());
 }

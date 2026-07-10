@@ -24,7 +24,6 @@
   "item.tfpw_compat.water_dragon_spawn_egg": "水ドラゴンのスポーンエッグ",
   "item.tfpw_compat.dark_dragon_spawn_egg": "闇ドラゴンのスポーンエッグ",
   "item.tfpw_compat.holy_dragon_spawn_egg": "聖ドラゴンのスポーンエッグ",
-  "item.tfpw_compat.erasure_dragon_spawn_egg": "消滅ドラゴンのスポーンエッグ",
   "entity.tfpw_compat.corrosion_dragon": "侵食ドラゴン",
   "entity.tfpw_compat.miasma_dragon": "瘴気ドラゴン",
   "entity.tfpw_compat.soul_dragon": "魂ドラゴン",
@@ -33,5 +32,5 @@
   "entity.tfpw_compat.water_dragon": "水ドラゴン",
   "entity.tfpw_compat.dark_dragon": "闇ドラゴン",
   "entity.tfpw_compat.holy_dragon": "聖ドラゴン",
-  "entity.tfpw_compat.erasure_dragon": "消滅ドラゴン"
+  "block.tfpw_compat.elemental_dynamo": "属性発電機"
 }

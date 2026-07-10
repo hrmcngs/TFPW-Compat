@@ -1,8 +1,10 @@
 package com.hrmcngs.tfpw_compat.item;
 
 import com.hrmcngs.tfpw_compat.TfpwCompat;
+import com.hrmcngs.tfpw_compat.block.ModBlocks;
 import com.hrmcngs.tfpw_compat.entity.ModEntities;
 
+import net.minecraft.world.item.BlockItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.Tier;
 import net.minecraftforge.common.ForgeSpawnEggItem;
@@ -61,5 +63,8 @@ public final class ModItems {
     public static final RegistryObject<Item> DRAGON_EGG_WATER     = REGISTRY.register("water_dragon_spawn_egg",     () -> new ForgeSpawnEggItem(ModEntities.WATER_DRAGON,     0x1E90FF, 0x104E8B, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_DARK      = REGISTRY.register("dark_dragon_spawn_egg",      () -> new ForgeSpawnEggItem(ModEntities.DARK_DRAGON,      0x301934, 0x120018, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_HOLY      = REGISTRY.register("holy_dragon_spawn_egg",      () -> new ForgeSpawnEggItem(ModEntities.HOLY_DRAGON,      0xFFF8DC, 0xCDC08B, new Item.Properties()));
-    public static final RegistryObject<Item> DRAGON_EGG_ERASURE   = REGISTRY.register("erasure_dragon_spawn_egg",   () -> new ForgeSpawnEggItem(ModEntities.ERASURE_DRAGON,   0x4B0000, 0x1A0000, new Item.Properties()));
+
+    // ── B (issue #199): 属性発電機ブロックの BlockItem ──
+    public static final RegistryObject<Item> ELEMENTAL_DYNAMO = REGISTRY.register("elemental_dynamo",
+            () -> new BlockItem(ModBlocks.ELEMENTAL_DYNAMO.get(), new Item.Properties()));
 }

@@ -24,7 +24,6 @@
   "item.tfpw_compat.water_dragon_spawn_egg": "Water Dragon Spawn Egg",
   "item.tfpw_compat.dark_dragon_spawn_egg": "Dark Dragon Spawn Egg",
   "item.tfpw_compat.holy_dragon_spawn_egg": "Holy Dragon Spawn Egg",
-  "item.tfpw_compat.erasure_dragon_spawn_egg": "Erasure Dragon Spawn Egg",
   "entity.tfpw_compat.corrosion_dragon": "Corrosion Dragon",
   "entity.tfpw_compat.miasma_dragon": "Miasma Dragon",
   "entity.tfpw_compat.soul_dragon": "Soul Dragon",
@@ -33,5 +32,5 @@
   "entity.tfpw_compat.water_dragon": "Water Dragon",
   "entity.tfpw_compat.dark_dragon": "Dark Dragon",
   "entity.tfpw_compat.holy_dragon": "Holy Dragon",
-  "entity.tfpw_compat.erasure_dragon": "Erasure Dragon"
+  "block.tfpw_compat.elemental_dynamo": "Elemental Dynamo"
 }

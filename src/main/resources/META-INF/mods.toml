@@ -7,8 +7,8 @@ issueTrackerURL="https://github.com/Drowse-Lab/The-four-primitives-and-Weapons/i
 modId="tfpw_compat"
 version="${version}"
 displayName="TFPW-Compat"
-credits="hiromichi-ngs"
-authors="hiromichi-ngs"
+credits="hrmcngs"
+authors="hrmcngs"
 description='''
 The four primitives and Weapons のアドオン。
 Ice and Fire (ドラゴン) / Mekanism との連携を提供する。

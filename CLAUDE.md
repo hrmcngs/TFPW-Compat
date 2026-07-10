@@ -5,8 +5,10 @@
 ## ルール
 - **返答は日本語**。
 - **勝手にビルド / version bump しない**。`./gradlew build` はユーザー明示要請時のみ。
-- 連携は **完全リフレクション**（compile 依存ゼロ、相手 MOD 不在でもロード成功）。本家 `compat/SpellbooksCompat.java` が手本。
+- `compat/` の連携は **完全リフレクション**（compile 依存ゼロ、相手 MOD 不在でもロード成功）。本家 `compat/SpellbooksCompat.java` が手本。
 - 相手 MOD の API へは `Class.forName` + `Method` でアクセスし、失敗時は無効化（落とさない）。
+- **例外**: `iceandfire` / `uranus` は **必須依存**（`mandatory=true`）。属性ドラゴンの描画に IaF の
+  Tabula モデルを使うため、`client/IafDragonRenderer` は uranus を `compileOnly` で直接参照する。
 
 ## バージョン / 座標
 - MC 1.20.1 / Forge 1.20.1-47.4.0 / Java 17 / official mappings / ForgeGradle 5.1.+
@@ -19,7 +21,7 @@ src/main/java/com/hrmcngs/tfpw_compat/
 └── compat/
     ├── IceAndFireCompat.java    # ドラゴン攻撃(炎/氷/雷) → 属性(FIRE/ICE/THUNDER)
     └── MekanismCompat.java      # 電気/雷属性 → FE 発電量換算
-src/main/resources/META-INF/mods.toml  # 依存は全て mandatory=false
+src/main/resources/META-INF/mods.toml  # iceandfire / uranus = mandatory、本体・mekanism = 任意
 ```
 
 ## TODO (issue #199)

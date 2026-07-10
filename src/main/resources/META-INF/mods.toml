@@ -23,8 +23,8 @@ Ice and Fire (ドラゴン) / Mekanism との連携を提供する。
     ordering="NONE"
     side="BOTH"
 
-# ── 連携対象はすべて任意 (mandatory=false)。ロード順だけ AFTER にする ──
-# 本体 MOD (属性システム提供元)。無い場合は連携そのものが no-op。
+# ── 依存 ────────────────────────────────────────────────────────────
+# 本体 MOD (属性システム提供元)。無い場合は連携そのものが no-op なので任意。
 [[dependencies.tfpw_compat]]
     modId="the_four_primitives_and_weapons"
     mandatory=false
@@ -32,11 +32,24 @@ Ice and Fire (ドラゴン) / Mekanism との連携を提供する。
     ordering="AFTER"
     side="BOTH"
 
-# Ice and Fire (ドラゴン)。modId は実 jar で要確認 (iceandfire が一般的)。
+# Ice and Fire: Community Edition (ドラゴン) — 必須。
+#   属性ドラゴンの描画に IaF のドラゴンモデル (firedragon_ground.tbl) を使うため、
+#   無いと見た目が成立しない。A-4 の属性紐付け / ドラゴン素材武器のレシピもこれに依存する。
 [[dependencies.tfpw_compat]]
     modId="iceandfire"
-    mandatory=false
+    mandatory=true
     versionRange="[0,)"
+    ordering="AFTER"
+    side="BOTH"
+
+# uranus (Ice and Fire CE のライブラリ) — 必須。
+#   client/IafDragonRenderer が uranus の TabulaModel / TabulaModelHandlerHelper を
+#   直接参照する。IaF 自身も uranus を mandatory 依存しているので実質同時に入るが、
+#   直接リンクしている以上ここでも明示しておく。
+[[dependencies.tfpw_compat]]
+    modId="uranus"
+    mandatory=true
+    versionRange="[2,)"
     ordering="AFTER"
     side="BOTH"
 

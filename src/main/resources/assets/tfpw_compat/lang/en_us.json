@@ -32,5 +32,14 @@
   "entity.tfpw_compat.water_dragon": "Water Dragon",
   "entity.tfpw_compat.dark_dragon": "Dark Dragon",
   "entity.tfpw_compat.holy_dragon": "Holy Dragon",
-  "block.tfpw_compat.elemental_dynamo": "Elemental Dynamo"
+  "block.tfpw_compat.elemental_dynamo": "Elemental Dynamo",
+  "entity.tfpw_compat.element_dragon_egg": "Dragon Egg",
+  "item.tfpw_compat.corrosion_dragon_egg": "Corrosion Dragon Egg",
+  "item.tfpw_compat.miasma_dragon_egg": "Miasma Dragon Egg",
+  "item.tfpw_compat.soul_dragon_egg": "Soul Dragon Egg",
+  "item.tfpw_compat.soul_fire_dragon_egg": "Soul Fire Dragon Egg",
+  "item.tfpw_compat.wind_dragon_egg": "Wind Dragon Egg",
+  "item.tfpw_compat.water_dragon_egg": "Water Dragon Egg",
+  "item.tfpw_compat.dark_dragon_egg": "Dark Dragon Egg",
+  "item.tfpw_compat.holy_dragon_egg": "Holy Dragon Egg"
 }

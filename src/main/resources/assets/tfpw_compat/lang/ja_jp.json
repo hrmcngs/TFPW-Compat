@@ -32,5 +32,14 @@
   "entity.tfpw_compat.water_dragon": "水ドラゴン",
   "entity.tfpw_compat.dark_dragon": "闇ドラゴン",
   "entity.tfpw_compat.holy_dragon": "聖ドラゴン",
-  "block.tfpw_compat.elemental_dynamo": "属性発電機"
+  "block.tfpw_compat.elemental_dynamo": "属性発電機",
+  "entity.tfpw_compat.element_dragon_egg": "ドラゴンの卵",
+  "item.tfpw_compat.corrosion_dragon_egg": "侵食ドラゴンの卵",
+  "item.tfpw_compat.miasma_dragon_egg": "瘴気ドラゴンの卵",
+  "item.tfpw_compat.soul_dragon_egg": "魂ドラゴンの卵",
+  "item.tfpw_compat.soul_fire_dragon_egg": "燐火ドラゴンの卵",
+  "item.tfpw_compat.wind_dragon_egg": "風ドラゴンの卵",
+  "item.tfpw_compat.water_dragon_egg": "水ドラゴンの卵",
+  "item.tfpw_compat.dark_dragon_egg": "闇ドラゴンの卵",
+  "item.tfpw_compat.holy_dragon_egg": "聖ドラゴンの卵"
 }

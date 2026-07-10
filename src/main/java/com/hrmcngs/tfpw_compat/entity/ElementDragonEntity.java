@@ -52,6 +52,20 @@ public abstract class ElementDragonEntity extends PathfinderMob implements Enemy
     /** 本体 ElementType 名 (小文字, 例 "corrosion")。属性別サブクラスが返す。 */
     public abstract String getElementName();
 
+    /**
+     * 眠っているか ( 描画で睡眠ポーズ/肌に使う )。
+     * <p>夜間で、 攻撃対象が無く、 地上で静止しているとき眠る ( Ice and Fire の睡眠に倣った簡易版 )。
+     */
+    public boolean isDragonSleeping() {
+        if (this.getTarget() != null || this.isVehicle() || this.isInWaterOrBubble()) {
+            return false;
+        }
+        if (!this.onGround() || this.getDeltaMovement().horizontalDistanceSqr() > 1.0e-4) {
+            return false;
+        }
+        return this.level().isNight();
+    }
+
     public static AttributeSupplier.Builder createAttributes() {
         return Mob.createMobAttributes()
                 .add(Attributes.MAX_HEALTH, 80.0)

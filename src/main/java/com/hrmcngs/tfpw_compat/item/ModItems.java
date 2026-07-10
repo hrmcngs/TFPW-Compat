@@ -2,6 +2,7 @@ package com.hrmcngs.tfpw_compat.item;
 
 import com.hrmcngs.tfpw_compat.TfpwCompat;
 import com.hrmcngs.tfpw_compat.block.ModBlocks;
+import com.hrmcngs.tfpw_compat.entity.ElementDragonEggItem;
 import com.hrmcngs.tfpw_compat.entity.ModEntities;
 
 import net.minecraft.world.item.BlockItem;
@@ -55,7 +56,7 @@ public final class ModItems {
     public static final RegistryObject<Item> LIGHTNING_DRAGONSTEEL_DAGGER  = reg("lightning_dragonsteel_dagger",  DragonTiers.LIGHTNING_DRAGONSTEEL, 2, -1.8f);
 
     // ── A-3: 属性ドラゴンのスポーンエッグ 11 種 (型別なので Forge 標準エッグを使用) ──
-    public static final RegistryObject<Item> DRAGON_EGG_CORROSION = REGISTRY.register("corrosion_dragon_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.CORROSION_DRAGON, 0x6B8E23, 0x3B4A16, new Item.Properties()));
+    public static final RegistryObject<Item> DRAGON_EGG_CORROSION = REGISTRY.register("corrosion_dragon_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.CORROSION_DRAGON, 0xFF55FF, 0xB03BB0, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_MIASMA    = REGISTRY.register("miasma_dragon_spawn_egg",    () -> new ForgeSpawnEggItem(ModEntities.MIASMA_DRAGON,    0x8A2BE2, 0x4B0082, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_SOUL      = REGISTRY.register("soul_dragon_spawn_egg",      () -> new ForgeSpawnEggItem(ModEntities.SOUL_DRAGON,      0x5CE1E6, 0x2E8B8F, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_SOUL_FIRE = REGISTRY.register("soul_fire_dragon_spawn_egg", () -> new ForgeSpawnEggItem(ModEntities.SOUL_FIRE_DRAGON, 0x2CE8F5, 0x1A7A8A, new Item.Properties()));
@@ -63,6 +64,20 @@ public final class ModItems {
     public static final RegistryObject<Item> DRAGON_EGG_WATER     = REGISTRY.register("water_dragon_spawn_egg",     () -> new ForgeSpawnEggItem(ModEntities.WATER_DRAGON,     0x1E90FF, 0x104E8B, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_DARK      = REGISTRY.register("dark_dragon_spawn_egg",      () -> new ForgeSpawnEggItem(ModEntities.DARK_DRAGON,      0x301934, 0x120018, new Item.Properties()));
     public static final RegistryObject<Item> DRAGON_EGG_HOLY      = REGISTRY.register("holy_dragon_spawn_egg",      () -> new ForgeSpawnEggItem(ModEntities.HOLY_DRAGON,      0xFFF8DC, 0xCDC08B, new Item.Properties()));
+
+    // ── A-3: 属性ドラゴンの卵 8 種 ( 設置すると一定時間後に孵化する ) ──
+    //   index は ModEntities.ELEMENT_ORDER に対応。
+    private static RegistryObject<Item> regDragonEgg(String id, int elementId) {
+        return REGISTRY.register(id, () -> new ElementDragonEggItem(elementId, new Item.Properties()));
+    }
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_CORROSION = regDragonEgg("corrosion_dragon_egg", 0);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_MIASMA    = regDragonEgg("miasma_dragon_egg",    1);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_SOUL      = regDragonEgg("soul_dragon_egg",      2);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_SOUL_FIRE = regDragonEgg("soul_fire_dragon_egg", 3);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_WIND      = regDragonEgg("wind_dragon_egg",      4);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_WATER     = regDragonEgg("water_dragon_egg",     5);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_DARK      = regDragonEgg("dark_dragon_egg",      6);
+    public static final RegistryObject<Item> DRAGON_EGG_ITEM_HOLY      = regDragonEgg("holy_dragon_egg",      7);
 
     // ── B (issue #199): 属性発電機ブロックの BlockItem ──
     public static final RegistryObject<Item> ELEMENTAL_DYNAMO = REGISTRY.register("elemental_dynamo",

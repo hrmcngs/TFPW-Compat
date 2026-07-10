@@ -29,6 +29,96 @@ def forge_version   = project.findProperty('FORGE_VERSION') ?: '1.20.1-47.4.0'
 
 println("Building TFPW-Compat for Minecraft ${mc_version} with Forge ${forge_version}")
 
+def boolProp = { String name, boolean defaultValue ->
+    def v = project.findProperty(name)
+    if (v == null) return defaultValue
+    return v.toString().equalsIgnoreCase('true')
+}
+
+// libs/local/ に名前へ <namePart> を含む .jar があるか ( 再帰・大文字小文字無視 )。
+// ある場合はその MOD を CurseMaven から DL しない ( 同一 modId の二重ロードを防ぐ )。
+def hasLocalJar = { String namePart ->
+    def d = file('libs/local')
+    if (!d.exists()) return false
+    def needle = namePart.toLowerCase()
+    def found = false
+    d.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+        def n = f.name.toLowerCase()
+        if (n.endsWith('.jar') && n.contains(needle)) found = true
+    }
+    return found
+}
+
+// =====================================================================
+// 本体 MOD (the_four_primitives_and_weapons) jar の自動取り込み
+//   Backpack-Arsenal と同じ仕組み: ソースプロジェクトの build/libs にある最新 jar を
+//   libs/local/<artifact>/<version>/ へ複製する ( 新しければ更新 )。
+//   → 下の「libs/local 再帰ローダ」がそれを runtimeOnly(fg.deobf) で取り込む。
+//
+//   jar を毎回作り直すには、 gradle を呼ぶ前に本体をビルドすること
+//   ( run_client.sh / build.sh が自動でやる。 SKIP_HOST_BUILD=1 で抑止 )。
+//   場所の変更: -PhostSourceProject=/path/to/The-four-primitives-and-Weapons
+// =====================================================================
+def host_artifact = 'the_four_primitives_and_weapons'
+def host_version  = (project.findProperty('host_version') ?: '1.20.1-dev').toString()
+def hostSourceProject = (project.findProperty('hostSourceProject')
+        ?: "${System.getProperty('user.home')}/The-four-primitives-and-Weapons").toString()
+
+def hostDestDir  = file("libs/local/${host_artifact}/${host_version}")
+def hostDestFile = new File(hostDestDir, "${host_artifact}-${host_version}.jar")
+def hostSrcJarDir = file("${hostSourceProject}/build/libs")
+if (hostSrcJarDir.exists()) {
+    def latestJar = hostSrcJarDir.listFiles()
+            ?.findAll {
+                it.name.endsWith('.jar') &&
+                        !it.name.contains('-sources') &&
+                        !it.name.contains('-dev') &&
+                        !it.name.contains('-javadoc')
+            }
+            ?.max { it.lastModified() }
+    if (latestJar != null && (!hostDestFile.exists() || latestJar.lastModified() > hostDestFile.lastModified())) {
+        hostDestDir.mkdirs()
+        hostDestFile.bytes = latestJar.bytes
+        println "[host] 本体 MOD jar を取り込み: ${latestJar.name} → libs/local/${host_artifact}/${host_version}/"
+    }
+} else if (!hostDestFile.exists()) {
+    logger.warn("[host] 本体 MOD ソース ${hostSourceProject} が見つからず、 libs/local にも jar が無い。")
+    logger.warn("[host] 本体を置くか、 libs/local/ に jar を直接入れてください ( 無くても TFPW-Compat は動く )。")
+}
+
+// 前提 MOD の自動ダウンロード ( -PwithPrereqMods=false で無効化 = 完全オフライン compile 用 )
+def withPrereqMods = boolProp('withPrereqMods', true)
+
+// ── Ice and Fire スタック ( iceandfire + uranus + jupiter + architectury ) ──────────
+//   問題: uranus は Architectury 9.2.14 を jar-in-jar ( META-INF/jars/ ) で同梱するが、
+//   fg.deobf は <外側の jar しか remap しない> ( 入れ子 jar は sha256 一致で素通し )。
+//   その結果 SRG のままの Architectury が読まれ、 mixin の @Shadow フィールド ( f_31946_ 等 ) が
+//   official マッピングの dev では解決できず "Mixin apply failed" でクラッシュしていた。
+//
+//   対策: uranus から同梱 Architectury を取り除き ( 下の strip 処理 )、
+//   同じ 9.2.14 を CurseMaven から fg.deobf 付きで別途入れる。
+//
+//   注意: mods.toml で iceandfire / uranus は mandatory=true にしてある。
+//   -PwithIceAndFire=false にすると必須依存が欠けて runClient は起動できない
+//   ( compileJava だけを通したいとき用のスイッチ )。
+def withIceAndFire = boolProp('withIceAndFire', true)
+// withIceAndFire=false のとき libs/local から除外する jar 名
+def iafStackNames = ['iceandfire', 'uranus', 'jupiter', 'architectury']
+// Architectury API ( CurseForge project 419699 )。 uranus 同梱と同じ 9.2.14 を使う。
+def architectury_curse_file = (project.findProperty('architectury_curse_file') ?: '5137938').toString()
+def curios_version = (project.findProperty('curios_version') ?: '5.10.0+1.20.1').toString()
+// Mekanism ( CurseForge project id: 268560 )。 最新 fileId は
+//   https://www.curseforge.com/minecraft/mc-mods/mekanism/files
+// で確認し -Pmekanism_curse_file=NNNN で上書きできる。
+def mekanism_curse_file = (project.findProperty('mekanism_curse_file') ?: '6552911').toString()
+
+// Ice and Fire: Community Edition (IAFEnvoy) と、その mandatory 依存 uranus / jupiter。
+//   https://www.curseforge.com/minecraft/mc-mods/iceandfire-ce/files
+//   -Piceandfire_curse_file= ( 空 ) を渡すと 3 点セットごと無効化できる ( 例: libs/local の jar を使う場合 )。
+def iceandfire_curse_file = (project.findProperty('iceandfire_curse_file') ?: '8378632').toString()
+def uranus_curse_file     = (project.findProperty('uranus_curse_file')     ?: '7745532').toString()
+def jupiter_curse_file    = (project.findProperty('jupiter_curse_file')    ?: '7738299').toString()
+
 minecraft {
     mappings channel: 'official', version: mapping_version
 
@@ -37,6 +127,11 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            // 前提 MOD ( Architectury 同梱の Ice and Fire CE など ) は production jar なので
+            // mixin の refmap が SRG 名 ( m_91374_ 等 ) を指す。 dev は official マッピングのため
+            // 実行時に refmap を SRG → official へ remap しないと "Mixin apply failed" で落ちる。
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 tfpw_compat {
                     source sourceSets.main
@@ -47,6 +142,8 @@ minecraft {
             workingDirectory project.file('run')
             property 'forge.logging.markers', 'REGISTRIES'
             property 'forge.logging.console.level', 'debug'
+            property 'mixin.env.remapRefMap', 'true'
+            property 'mixin.env.refMapRemappingFile', "${projectDir}/build/createSrgToMcp/output.srg"
             mods {
                 tfpw_compat {
                     source sourceSets.main
@@ -57,17 +154,171 @@ minecraft {
 }
 
 repositories {
-    // 開発時に相手 MOD ( iceandfire / mekanism / the_four_primitives_and_weapons 本体 )
-    // の deobf jar を放り込んで実動作確認するためのローカル Maven。
-    //   libs/local/<artifact>-<version>.jar を置くと runtimeOnly で取り込む。
+    // libs/ をローカル Maven として登録。 libs/local/<artifact>/<version>/<artifact>-<version>.jar が
+    // "local:<artifact>:<version>" として解決される ( 本体 jar / 手動で置いた jar 用 )。
     maven {
         url = file('libs').toURI()
         metadataSources { artifact() }
+    }
+    // 前提 MOD の自動ダウンロード用
+    maven { url 'https://maven.theillusivec4.top/' }   // Curios
+    maven {
+        url 'https://www.cursemaven.com'              // Mekanism / Ice and Fire CE / Architectury 等
+        content { includeGroup 'curse.maven' }
+    }
+}
+
+// =====================================================================
+// uranus から 同梱 Architectury ( SRG のまま ) を取り除いた jar を作り、 libs/local へ置く。
+//   fg.deobf は jar-in-jar を remap しないので、 同梱版を読むと dev でクラッシュする。
+//   取り除いた分の Architectury は下の dependencies で CurseMaven から deobf 付きで入れる。
+//   ( 生成物: libs/local/uranus-stripped/<fileId>/uranus-stripped-<fileId>.jar
+//     → libs/local 再帰ローダが runtimeOnly(fg.deobf) で取り込む )
+// =====================================================================
+//   ※ uranus は compile 依存でもある ( client の IafDragonRenderer が TabulaModel を使う ) ので、
+//     withIceAndFire に関わらず withPrereqMods=true の間は必ず用意する。
+def uranusStrippedJar = file("libs/local/uranus-stripped/${uranus_curse_file}/uranus-stripped-${uranus_curse_file}.jar")
+if (withPrereqMods) {
+    try {
+        // 生 ( 非 deobf ) の uranus jar を取得する。
+        //   ここで configurations.detachedConfiguration(...).resolve() を使ってはいけない:
+        //   configuration 時にリポジトリを解決してしまい、 ForgeGradle が後から自分の
+        //   content filter を設定できず "Cannot mutate content repository descriptor" で落ちる。
+        //   → Gradle キャッシュを探し、 無ければ CurseMaven から直接 HTTP で落とす。
+        def rawUranus = null
+        def cacheBase = file("${System.getProperty('user.home')}/.gradle/caches/modules-2/files-2.1/curse.maven/uranus-1010827/${uranus_curse_file}")
+        if (cacheBase.exists()) {
+            cacheBase.eachFileRecurse(groovy.io.FileType.FILES) { f ->
+                if (rawUranus == null && f.name.endsWith('.jar')) rawUranus = f
+            }
+        }
+        if (rawUranus == null) {
+            def dl = file("build/rawJars/uranus-1010827-${uranus_curse_file}.jar")
+            if (!dl.exists()) {
+                dl.parentFile.mkdirs()
+                def url = "https://cursemaven.com/curse/maven/uranus-1010827/${uranus_curse_file}/uranus-1010827-${uranus_curse_file}.jar"
+                println "[iaf] uranus を直接ダウンロード: ${url}"
+                new URL(url).withInputStream { i -> dl.withOutputStream { o -> o << i } }
+            }
+            rawUranus = dl
+        }
+
+        if (rawUranus == null || !rawUranus.exists()) {
+            logger.warn("[iaf] uranus jar を取得できませんでした ( -PwithIceAndFire=false で回避可 )")
+        } else {
+            uranusStrippedJar.parentFile.mkdirs()
+            // 毎回作り直す。 entry の時刻を原本から引き継ぐので出力は決定的 → fg.deobf のキャッシュが効く。
+            def tmp = new File(uranusStrippedJar.parentFile, uranusStrippedJar.name + '.tmp')
+            int dropped = 0
+            byte[] jijMeta = null
+
+            new java.util.zip.ZipInputStream(new FileInputStream(rawUranus)).withCloseable { zin ->
+                new java.util.zip.ZipOutputStream(new FileOutputStream(tmp)).withCloseable { zout ->
+                    def entry
+                    byte[] buf = new byte[8192]
+                    while ((entry = zin.getNextEntry()) != null) {
+                        def n = entry.name
+                        // 1) 同梱 Architectury 本体 ( SRG のまま。 これが dev で mixin を壊す )
+                        def isNestedArch = n.startsWith('META-INF/jars/') && n.toLowerCase().contains('architectury')
+                        // 2) 署名ファイル ( entry を削ると検証が壊れる )
+                        def isSignature = n.startsWith('META-INF/') &&
+                                (n.endsWith('.SF') || n.endsWith('.RSA') || n.endsWith('.DSA'))
+                        // 3) jarjar のメタデータ: 後で「削除した jar の宣言」を除いて書き直す
+                        def isJijMeta = (n == 'META-INF/jarjar/metadata.json')
+
+                        if (isNestedArch || isSignature) {
+                            dropped++; zin.closeEntry(); continue
+                        }
+                        if (isJijMeta) {
+                            def bos = new ByteArrayOutputStream()
+                            int l; while ((l = zin.read(buf)) > 0) bos.write(buf, 0, l)
+                            jijMeta = bos.toByteArray()
+                            zin.closeEntry(); continue
+                        }
+
+                        def out = new java.util.zip.ZipEntry(n)
+                        out.time = entry.time   // 決定的な出力にする
+                        zout.putNextEntry(out)
+                        int len
+                        while ((len = zin.read(buf)) > 0) zout.write(buf, 0, len)
+                        zout.closeEntry(); zin.closeEntry()
+                    }
+
+                    // jarjar メタデータを「実体が残っている jar」だけに絞って書き戻す。
+                    // ( 残さないと Forge が消えた nested jar を読もうとして
+                    //   "Invalid paths argument, contained no existing paths" で落ちる )
+                    if (jijMeta != null) {
+                        def meta = new groovy.json.JsonSlurper().parse(jijMeta)
+                        def jars = (meta.jars ?: []).findAll { j ->
+                            !(j?.path?.toString()?.toLowerCase()?.contains('architectury'))
+                        }
+                        meta.jars = jars
+                        def bytes = groovy.json.JsonOutput.toJson(meta).getBytes('UTF-8')
+                        def out = new java.util.zip.ZipEntry('META-INF/jarjar/metadata.json')
+                        out.time = 0L
+                        zout.putNextEntry(out)
+                        zout.write(bytes)
+                        zout.closeEntry()
+                        println "[iaf] jarjar metadata を書き直し ( 残り nested jar: ${jars.size()} )"
+                    }
+                }
+            }
+            if (uranusStrippedJar.exists()) uranusStrippedJar.delete()
+            tmp.renameTo(uranusStrippedJar)
+            println "[iaf] uranus から同梱 Architectury を除去 (${dropped} entries) → ${uranusStrippedJar.name}"
+        }
+    } catch (Exception e) {
+        logger.warn("[iaf] uranus の strip に失敗: ${e.message} ( -PwithIceAndFire=false で回避可 )")
     }
 }
 
 dependencies {
     minecraft "net.minecraftforge:forge:${forge_version}"
+
+    // ─── uranus: 唯一の compile 依存 ─────────────────────────────────────
+    //   client/IafDragonRenderer が uranus の TabulaModel / TabulaModelHandlerHelper を使い、
+    //   Ice and Fire の本物のドラゴンモデル (.tbl) を自前エンティティで描画する。
+    //   compileOnly なので配布 jar には含まれない。 実行時に uranus が無ければ
+    //   TfpwCompatClient が箱モデル ( ElementDragonRenderer ) にフォールバックする。
+    if (uranusStrippedJar.exists()) {
+        compileOnly fg.deobf("local:uranus-stripped:${uranus_curse_file}")
+    } else {
+        logger.warn("[iaf] uranus jar が無いため IafDragonRenderer をコンパイルできません ( -PwithPrereqMods=true が必要 )")
+    }
+
+    // ─── 前提 MOD の自動ダウンロード ( -PwithPrereqMods=false で無効化 ) ──────
+    //   本 MOD は compile 依存ゼロ ( 完全リフレクション + Forge ネイティブ実装 ) なので
+    //   すべて runtimeOnly。 runClient で連携相手を実際にロードするためだけに使う。
+    //   本体 (the_four_primitives_and_weapons) はソースからビルドして libs/local 経由で入る。
+    //   libs/local に同名 jar があるものは DL しない ( ローカル優先 / 二重ロード防止 )。
+    if (withPrereqMods) {
+        // Curios — 本体 MOD の book スロットが依存
+        if (hasLocalJar('curios')) println "[external] Curios: libs/local の jar を使用 ( DL skip )"
+        else runtimeOnly fg.deobf("top.theillusivec4.curios:curios-forge:${curios_version}")
+
+        // Mekanism — 属性発電機 (FE) の受け先
+        if (hasLocalJar('mekanism')) println "[external] Mekanism: libs/local の jar を使用 ( DL skip )"
+        else runtimeOnly fg.deobf("curse.maven:mekanism-268560:${mekanism_curse_file}")
+
+        // Ice and Fire CE + mandatory 依存 ( uranus / jupiter ) + Architectury。
+        //   uranus は「同梱 Architectury を除去した stripped jar」を libs/local から読む ( 上の strip 処理 )。
+        //   Architectury は fg.deobf 付きで CurseMaven から入れる ( これが今回のクラッシュ修正の要 )。
+        if (withIceAndFire && !iceandfire_curse_file.isEmpty()) {
+            if (hasLocalJar('iceandfire')) println "[external] Ice and Fire CE: libs/local の jar を使用 ( DL skip )"
+            else runtimeOnly fg.deobf("curse.maven:iceandfire-ce-1040076:${iceandfire_curse_file}")
+
+            // uranus: stripped jar が libs/local にあれば再帰ローダが拾う ( hasLocalJar が true になる )。
+            if (hasLocalJar('uranus')) println "[external] uranus: libs/local の jar を使用 ( DL skip )"
+            else runtimeOnly fg.deobf("curse.maven:uranus-1010827:${uranus_curse_file}")
+
+            if (hasLocalJar('jupiter')) println "[external] jupiter: libs/local の jar を使用 ( DL skip )"
+            else runtimeOnly fg.deobf("curse.maven:jupiter-1072905:${jupiter_curse_file}")
+
+            // Architectury ( uranus 同梱の SRG 版は除去済み )。 deobf 済みを入れないと mixin が壊れる。
+            if (hasLocalJar('architectury')) println "[external] architectury: libs/local の jar を使用 ( DL skip )"
+            else runtimeOnly fg.deobf("curse.maven:architectury-api-419699:${architectury_curse_file}")
+        }
+    }
 
     // ─── 前提 MOD ( libs/local/ 配下の .jar ) を取り込む ───────────────────
     //   本 MOD のコードは 完全リフレクション + Forge ネイティブ実装なので
@@ -109,6 +360,13 @@ dependencies {
 
         jars.each { f ->
             def base = f.name.replaceFirst(/\.jar$/, '')
+
+            // withIceAndFire=false のときは IaF スタックを読み込まない ( Architectury mixin が dev で壊れるため )。
+            if (!withIceAndFire && iafStackNames.any { base.toLowerCase().contains(it) }) {
+                println "[external] ${f.name}: skip ( -PwithIceAndFire=true で有効化 )"
+                return
+            }
+
             def verDir = f.parentFile
             def artDir = verDir?.parentFile
 

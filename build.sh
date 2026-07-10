@@ -49,6 +49,14 @@ done
 
 echo "=== $LABEL ==="
 
+# --- 本体 MOD の jar を毎回生成 ( ビルドのたびに最新ソースを反映 ) ---
+#   build.gradle が <本体>/build/libs の最新 jar を libs/local/ へ自動取り込みする。
+#   SKIP_HOST_BUILD=1 で抑止。 HOST_DIR / HOST_BUILD_ARGS も build_host.sh と同じ。
+HOST_ARGS=""
+case " $GRADLE_ARGS " in *" --offline "*) HOST_ARGS="$HOST_ARGS offline" ;; esac
+[ "$USE_TLS_WORKAROUND" = "no" ] && HOST_ARGS="$HOST_ARGS notls"
+bash "$(dirname "$0")/build_host.sh" $HOST_ARGS || true
+
 # --- クリーン: build/ を掃除するが build/fg_cache ( 再コンパイル済み Minecraft 依存 ) は残す ---
 #   gradle の `clean` タスクは fg_cache も消すため、 同一実行の compileJava が
 #   「設定時にマップ済み MC jar が未生成」 で net.minecraft.* を解決できず失敗する。

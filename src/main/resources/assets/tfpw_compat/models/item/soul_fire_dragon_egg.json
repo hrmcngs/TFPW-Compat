@@ -1,0 +1,6 @@
+{
+  "parent": "item/generated",
+  "textures": {
+    "layer0": "tfpw_compat:item/soul_fire_dragon_egg"
+  }
+}

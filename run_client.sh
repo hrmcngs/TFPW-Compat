@@ -17,11 +17,13 @@ cd "$(dirname "$0")"
 GRADLE_ARGS="runClient"
 USE_TLS_WORKAROUND="yes"
 KILL_DAEMON="yes"
+OFFLINE="no"
 
 for arg in "$@"; do
     case "$arg" in
         offline)
             GRADLE_ARGS="$GRADLE_ARGS --offline -x downloadAssets"
+            OFFLINE="yes"
             echo "=== Offline mode (cached deps, downloadAssets skip) ==="
             ;;
         notls|no-tls)
@@ -36,6 +38,14 @@ for arg in "$@"; do
             ;;
     esac
 done
+
+# --- 本体 MOD (the_four_primitives_and_weapons) の jar を毎回生成 ---
+#   build_host.sh が本体をビルドし、 build.gradle が build/libs の最新 jar を
+#   libs/local/ に自動取り込みする ( SKIP_HOST_BUILD=1 / HOST_DIR / HOST_BUILD_ARGS で制御 )。
+HOST_ARGS=""
+[ "$OFFLINE" = "yes" ] && HOST_ARGS="$HOST_ARGS offline"
+[ "$USE_TLS_WORKAROUND" = "no" ] && HOST_ARGS="$HOST_ARGS notls"
+bash "$(dirname "$0")/build_host.sh" $HOST_ARGS || true
 
 # --- gradle daemon を停止 ( JVM 引数 / 環境変数の変更を確実に反映 ) ---
 if [ "$KILL_DAEMON" = "yes" ] && [ -x ./gradlew ]; then

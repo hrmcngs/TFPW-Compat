@@ -56,6 +56,16 @@ public final class ModTabs {
                         output.accept(ModItems.DRAGON_EGG_DARK.get());
                         output.accept(ModItems.DRAGON_EGG_HOLY.get());
 
+                        // A-3: 属性ドラゴンの卵 8 種 ( 設置 → 時間経過で孵化 )
+                        output.accept(ModItems.DRAGON_EGG_ITEM_CORROSION.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_MIASMA.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_SOUL.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_SOUL_FIRE.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_WIND.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_WATER.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_DARK.get());
+                        output.accept(ModItems.DRAGON_EGG_ITEM_HOLY.get());
+
                         // B: 属性発電機
                         output.accept(ModItems.ELEMENTAL_DYNAMO.get());
                     })

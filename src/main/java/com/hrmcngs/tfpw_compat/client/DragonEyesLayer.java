@@ -36,7 +36,7 @@ public class DragonEyesLayer<T extends ElementDragonEntity>
             return;
         }
         ResourceLocation eyes = new ResourceLocation(TfpwCompat.MOD_ID,
-                "textures/entity/element_dragon/eyes_" + entity.getElementName() + ".png");
+                "textures/entity/element_dragon/eyes.png");
         VertexConsumer buffer = buffers.getBuffer(RenderType.eyes(eyes));
         // ベースモデル ( 現在ポーズ ) をそのまま全輝度で描画する。
         this.getParentModel().renderToBuffer(poseStack, buffer, LightTexture.FULL_BRIGHT,

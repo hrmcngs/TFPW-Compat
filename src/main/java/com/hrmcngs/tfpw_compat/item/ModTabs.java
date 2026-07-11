@@ -66,6 +66,16 @@ public final class ModTabs {
                         output.accept(ModItems.DRAGON_EGG_ITEM_DARK.get());
                         output.accept(ModItems.DRAGON_EGG_ITEM_HOLY.get());
 
+                        // A-3: 属性ドラゴンの餌 8 種
+                        output.accept(ModItems.FEED_CORROSION.get());
+                        output.accept(ModItems.FEED_MIASMA.get());
+                        output.accept(ModItems.FEED_SOUL.get());
+                        output.accept(ModItems.FEED_SOUL_FIRE.get());
+                        output.accept(ModItems.FEED_WIND.get());
+                        output.accept(ModItems.FEED_WATER.get());
+                        output.accept(ModItems.FEED_DARK.get());
+                        output.accept(ModItems.FEED_HOLY.get());
+
                         // B: 属性発電機
                         output.accept(ModItems.ELEMENTAL_DYNAMO.get());
                     })

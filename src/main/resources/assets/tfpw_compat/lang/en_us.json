@@ -41,5 +41,14 @@
   "item.tfpw_compat.wind_dragon_egg": "Wind Dragon Egg",
   "item.tfpw_compat.water_dragon_egg": "Water Dragon Egg",
   "item.tfpw_compat.dark_dragon_egg": "Dark Dragon Egg",
-  "item.tfpw_compat.holy_dragon_egg": "Holy Dragon Egg"
+  "item.tfpw_compat.holy_dragon_egg": "Holy Dragon Egg",
+  "tooltip.tfpw_compat.dragon_feed": "Feed to the matching element dragon to heal and grow it",
+  "item.tfpw_compat.corrosion_dragon_feed": "Corrosion Dragon Feed",
+  "item.tfpw_compat.miasma_dragon_feed": "Miasma Dragon Feed",
+  "item.tfpw_compat.soul_dragon_feed": "Soul Dragon Feed",
+  "item.tfpw_compat.soul_fire_dragon_feed": "Soul Fire Dragon Feed",
+  "item.tfpw_compat.wind_dragon_feed": "Wind Dragon Feed",
+  "item.tfpw_compat.water_dragon_feed": "Water Dragon Feed",
+  "item.tfpw_compat.dark_dragon_feed": "Dark Dragon Feed",
+  "item.tfpw_compat.holy_dragon_feed": "Holy Dragon Feed"
 }

@@ -31,6 +31,9 @@ public class PosedTabulaModel<T extends ElementDragonEntity> extends EntityModel
     private final TabulaModel<T> sleeping;
 
     private TabulaModel<T> current;
+    private float tintR = 1.0f;
+    private float tintG = 1.0f;
+    private float tintB = 1.0f;
 
     public PosedTabulaModel(TabulaModel<T> ground, TabulaModel<T> hovering,
                             TabulaModel<T> flying, TabulaModel<T> sleeping) {
@@ -40,6 +43,13 @@ public class PosedTabulaModel<T extends ElementDragonEntity> extends EntityModel
         this.flying = flying;
         this.sleeping = sleeping;
         this.current = ground;
+    }
+
+    /** 個体差の色乗算 ( 描画直前に設定 )。1,1,1 で無効。 */
+    public void setTint(float r, float g, float b) {
+        this.tintR = r;
+        this.tintG = g;
+        this.tintB = b;
     }
 
     /** 描画する姿勢を選ぶ ( 描画直前に呼ぶ )。 */
@@ -74,6 +84,7 @@ public class PosedTabulaModel<T extends ElementDragonEntity> extends EntityModel
     @Override
     public void renderToBuffer(PoseStack poseStack, VertexConsumer buffer, int packedLight, int packedOverlay,
                                float r, float g, float b, float alpha) {
-        this.current.renderToBuffer(poseStack, buffer, packedLight, packedOverlay, r, g, b, alpha);
+        this.current.renderToBuffer(poseStack, buffer, packedLight, packedOverlay,
+                r * this.tintR, g * this.tintG, b * this.tintB, alpha);
     }
 }

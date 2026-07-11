@@ -75,6 +75,7 @@ public class ElementDragonEggEntity extends Entity {
             dragon.moveTo(this.getX(), this.getY(), this.getZ(), this.getYRot(), 0.0f);
             dragon.finalizeSpawn(server, server.getCurrentDifficultyAt(this.blockPosition()),
                     MobSpawnType.NATURAL, null, null);
+            dragon.setStage(1); // 卵から孵ったら幼体
             server.addFreshEntity(dragon);
             server.playSound(null, this.blockPosition(), SoundEvents.TURTLE_EGG_HATCH,
                     SoundSource.NEUTRAL, 1.0f, 1.0f);

@@ -1,0 +1,28 @@
+{
+  "_comment": "Ice and Fire CE の武器を本体の武器タイプへ登録する (本体がマージ読み込み)。剣=sword / ダガー=dagger。iceandfire は必須依存なので id は常に解決する。",
+  "types": {
+    "sword": {
+      "items": [
+        "iceandfire:copper_sword",
+        "iceandfire:silver_sword",
+        "iceandfire:dragonbone_sword",
+        "iceandfire:dragonbone_sword_fire",
+        "iceandfire:dragonbone_sword_ice",
+        "iceandfire:dragonbone_sword_lightning",
+        "iceandfire:dragonsteel_fire_sword",
+        "iceandfire:dragonsteel_ice_sword",
+        "iceandfire:dragonsteel_lightning_sword",
+        "iceandfire:dread_sword",
+        "iceandfire:dread_knight_sword",
+        "iceandfire:dread_queen_sword",
+        "iceandfire:ghost_sword",
+        "iceandfire:hippogryph_sword"
+      ]
+    },
+    "dagger": {
+      "items": [
+        "iceandfire:stymphalian_bird_dagger"
+      ]
+    }
+  }
+}

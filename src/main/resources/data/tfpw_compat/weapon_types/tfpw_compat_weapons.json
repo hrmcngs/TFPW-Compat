@@ -1,0 +1,37 @@
+{
+  "_comment": "TFPW-Compat のドラゴン素材武器を本体の武器タイプへ登録する (本体がマージ読み込み)。刀=katana / 直刀=straight_sword / レイピア=rapier / ダガー=dagger。",
+  "types": {
+    "katana": {
+      "items": [
+        "tfpw_compat:dragonbone_katana",
+        "tfpw_compat:fire_dragonsteel_katana",
+        "tfpw_compat:ice_dragonsteel_katana",
+        "tfpw_compat:lightning_dragonsteel_katana"
+      ]
+    },
+    "straight_sword": {
+      "items": [
+        "tfpw_compat:dragonbone_tyokuto",
+        "tfpw_compat:fire_dragonsteel_tyokuto",
+        "tfpw_compat:ice_dragonsteel_tyokuto",
+        "tfpw_compat:lightning_dragonsteel_tyokuto"
+      ]
+    },
+    "rapier": {
+      "items": [
+        "tfpw_compat:dragonbone_rapier",
+        "tfpw_compat:fire_dragonsteel_rapier",
+        "tfpw_compat:ice_dragonsteel_rapier",
+        "tfpw_compat:lightning_dragonsteel_rapier"
+      ]
+    },
+    "dagger": {
+      "items": [
+        "tfpw_compat:dragonbone_dagger",
+        "tfpw_compat:fire_dragonsteel_dagger",
+        "tfpw_compat:ice_dragonsteel_dagger",
+        "tfpw_compat:lightning_dragonsteel_dagger"
+      ]
+    }
+  }
+}

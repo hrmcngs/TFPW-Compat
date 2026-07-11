@@ -41,5 +41,14 @@
   "item.tfpw_compat.wind_dragon_egg": "風ドラゴンの卵",
   "item.tfpw_compat.water_dragon_egg": "水ドラゴンの卵",
   "item.tfpw_compat.dark_dragon_egg": "闇ドラゴンの卵",
-  "item.tfpw_compat.holy_dragon_egg": "聖ドラゴンの卵"
+  "item.tfpw_compat.holy_dragon_egg": "聖ドラゴンの卵",
+  "tooltip.tfpw_compat.dragon_feed": "対応する属性のドラゴンに与えると回復し成長する",
+  "item.tfpw_compat.corrosion_dragon_feed": "侵食ドラゴンの餌",
+  "item.tfpw_compat.miasma_dragon_feed": "瘴気ドラゴンの餌",
+  "item.tfpw_compat.soul_dragon_feed": "魂ドラゴンの餌",
+  "item.tfpw_compat.soul_fire_dragon_feed": "燐火ドラゴンの餌",
+  "item.tfpw_compat.wind_dragon_feed": "風ドラゴンの餌",
+  "item.tfpw_compat.water_dragon_feed": "水ドラゴンの餌",
+  "item.tfpw_compat.dark_dragon_feed": "闇ドラゴンの餌",
+  "item.tfpw_compat.holy_dragon_feed": "聖ドラゴンの餌"
 }

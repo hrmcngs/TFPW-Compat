@@ -23,12 +23,14 @@ public class ElementDragonRenderer<T extends ElementDragonEntity> extends MobRen
 
     @Override
     protected void scale(T entity, PoseStack poseStack, float partialTick) {
-        poseStack.scale(SCALE, SCALE, SCALE);
+        float s = SCALE * entity.getScale();
+        poseStack.scale(s, s, s);
     }
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
+        // フォールバック ( IaF 不在時。 実際は IaF 必須なので未到達 )。中立グレー肌を使う。
         return new ResourceLocation(TfpwCompat.MOD_ID,
-                "textures/entity/element_dragon/" + entity.getElementName() + ".png");
+                "textures/entity/element_dragon/stage_" + entity.getStage() + ".png");
     }
 }

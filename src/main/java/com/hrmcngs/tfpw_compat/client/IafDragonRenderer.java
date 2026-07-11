@@ -68,6 +68,13 @@ public class IafDragonRenderer<T extends ElementDragonEntity> extends MobRendere
     public void render(T entity, float entityYaw, float partialTick,
                        PoseStack poseStack, MultiBufferSource buffers, int packedLight) {
         this.model.setPose(poseFor(entity));
+        // 中立グレー肌に、この個体のカラーバリアント色を乗算 ( 本家式の色分け )。
+        // グレーの明度中心 ~0.8 を補正して色を出す。
+        int rgb = entity.getTintColor();
+        this.model.setTint(
+                Math.min(1.0f, ((rgb >> 16) & 0xFF) / 255.0f / 0.8f),
+                Math.min(1.0f, ((rgb >> 8) & 0xFF) / 255.0f / 0.8f),
+                Math.min(1.0f, (rgb & 0xFF) / 255.0f / 0.8f));
         super.render(entity, entityYaw, partialTick, poseStack, buffers, packedLight);
     }
 
@@ -86,13 +93,14 @@ public class IafDragonRenderer<T extends ElementDragonEntity> extends MobRendere
 
     @Override
     protected void scale(T entity, PoseStack poseStack, float partialTick) {
-        poseStack.scale(SCALE, SCALE, SCALE);
+        float s = SCALE * entity.getScale(); // 成長段階でスケール
+        poseStack.scale(s, s, s);
     }
 
     @Override
     public ResourceLocation getTextureLocation(T entity) {
-        String prefix = entity.isDragonSleeping() ? "sleeping_" : "";
-        return new ResourceLocation(TfpwCompat.MOD_ID,
-                "textures/entity/element_dragon/" + prefix + entity.getElementName() + ".png");
+        // 肌は中立グレー ( 色は個体バリアントで描画時に乗算 )。 睡眠 = sleeping、 通常 = 成長段階別。
+        String path = entity.isDragonSleeping() ? "sleeping" : ("stage_" + entity.getStage());
+        return new ResourceLocation(TfpwCompat.MOD_ID, "textures/entity/element_dragon/" + path + ".png");
     }
 }
